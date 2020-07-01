@@ -2,6 +2,7 @@ class User {
     
     constructor(name, gender, birth, country, email, password, photo, admin){
 
+        this._id;
         this._name = name;
         this._gender = gender;
         this._birth = birth;
@@ -14,7 +15,109 @@ class User {
 
     }
 
+    static getUsersFromStorage(){
+
+        let users = [];
+
+        if (localStorage.getItem("users")) {
+
+            users = JSON.parse(localStorage.getItem("users"));
+
+        }  
+
+        return users;
+
+    }
+
+    getNewId(){
+
+        let usersId = parseInt(localStorage.getItem("usersID"));
+
+        if (!usersId) {
+            usersId = 0
+        }
+    
+        usersId++;
+
+        localStorage.setItem("usersID", usersId);
+
+        return usersId;
+
+    }
+
+    remove(){
+
+        let users = User.getUsersFromStorage();
+
+        users.forEach((userData, index)=> {
+
+            if(this._id == userData._id) {
+
+                console.log(userData, index);
+                
+                users.splice(index, 1);
+
+            }
+
+        });
+
+        localStorage.setItem("users", JSON.stringify(users));
+
+    }
+
+    save(){
+
+        let users = User.getUsersFromStorage();
+
+        if (this.id > 0) {
+
+            users.map(u => {
+
+                if (u._id == this.id) {
+
+                    Object.assign(u, this);
+
+                }
+
+                return u;
+
+            });
+
+        } else {
+            //gerar id
+            this.id = this.getNewId();
+
+            users.push(this);
+
+        }
+
+        localStorage.setItem("users", JSON.stringify(users));
+
+    }
+
+    loadFromJSON(json){
+
+        for (let name in json) {
+
+            switch (name) {
+                case '_register':
+                    this[name] = new Date(json[name]);
+                    break;
+                default:
+                    this[name] = json[name];
+                    break;
+
+            }
+
+        }
+        
+    }
+
     //getters
+
+    get id(){
+        return this._id;
+    }
 
     get name(){
         return this._name;
@@ -53,6 +156,10 @@ class User {
     }
 
     //setters
+
+    set id(value){
+        this._id = value;
+    }
 
     set photo(value){
         this._photo = value;
